@@ -11,11 +11,11 @@ pub mod testando_sol {
     pub fn send_tweet(send_tweet_ctx: Context<SendTAweet>, topic:String, content: String) -> Result<( )>{
 
         if topic.chars().count() > 50 {
-
+            return err!(TweetsErros::TopicTooLong);
         }
 
         if content.chars().count() > 280 {
-
+            return  err!(TweetsErros::ContentTooLong);
         }
 
         let my_tweet = &mut send_tweet_ctx.accounts.my_tweet;
@@ -31,17 +31,18 @@ pub mod testando_sol {
 }
 
 #[error_code]
-pub enum tweetsErros {
+pub enum TweetsErros {
     #[msg("This Topic is so much long")]
     TopicTooLong,
+    #[msg("This tweet is so much long")]
     ContentTooLong
 }
 
 
 #[derive(Accounts)]
 pub struct SendTAweet<'info> {
-    #[account(init, payer=sender_of_tweet, space=tweetOnSolana::LEN )]
-    pub my_tweet: Account<'info, tweetOnSolana>,
+    #[account(init, payer=sender_of_tweet, space=TweetOnSolana::LEN )]
+    pub my_tweet: Account<'info, TweetOnSolana>,
 
     #[account(mut)]
     pub sender_of_tweet: Signer<'info>,
@@ -51,7 +52,7 @@ pub struct SendTAweet<'info> {
 
 
 #[account]
-pub struct tweetOnSolana{
+pub struct TweetOnSolana{
     pub author: Pubkey,
     pub timestamp: i64,
     pub topic: String,
@@ -65,7 +66,7 @@ const STRING_LENGTH_PREFIX: usize = 4;
 const MAX_TOPIC_LENGTH: usize = 50 * 4;
 const MAX_CONTENT_LENGTH: usize = 280 * 4;
 
-impl tweetOnSolana {
+impl TweetOnSolana {
     const LEN: usize = DISCRIMINATION_LENGTH + PUBLIC_KEY_LENGTH 
     + TIMESTAMP_LENGTH + STRING_LENGTH_PREFIX + MAX_CONTENT_LENGTH + MAX_TOPIC_LENGTH;
 }
